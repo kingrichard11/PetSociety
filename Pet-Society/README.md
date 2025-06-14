@@ -38,11 +38,12 @@ As part of the backend development team, I contributed to:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/keilaayelen/Pet-Society.git
+   git clone https://github.com/kingrichard11/PetSociety
 
  ## 📅 Status
 🔧 This project is currently in development.
-🎓 Final delivery expected by June 2025.
+🎓 Final delivery expected by September
+2025.
 
 ## 📄 License
 This is an academic project developed for educational purposes only.
