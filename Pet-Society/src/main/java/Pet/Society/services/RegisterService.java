@@ -1,5 +1,6 @@
 package Pet.Society.services;
 
+import Pet.Society.models.dto.client.ClientDTO;
 import Pet.Society.models.dto.register.RegisterDTO;
 import Pet.Society.models.entities.ClientEntity;
 import Pet.Society.models.entities.CredentialEntity;
@@ -7,12 +8,14 @@ import Pet.Society.models.entities.DoctorEntity;
 import Pet.Society.models.entities.UserEntity;
 import Pet.Society.models.enums.Role;
 import Pet.Society.models.exceptions.UserAttributeException;
+import Pet.Society.models.interfaces.Mapper;
+import com.mysql.cj.xdevapi.Client;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class RegisterService {
+public class RegisterService  {
 
     private final ClientService clientService;
 
@@ -33,23 +36,25 @@ public class RegisterService {
         this.doctorService = doctorService;
     }
 
-    public void registerNewClient(RegisterDTO registerDTO) {
-        ClientEntity clientEntity = new ClientEntity();
-        clientEntity.setName(registerDTO.getName());
-        clientEntity.setSurname(registerDTO.getSurname());
-        clientEntity.setFoundation(false);
-        clientEntity.setDni(registerDTO.getDni());
-        clientEntity.setEmail(registerDTO.getEmail());
-        clientEntity.setPhone(registerDTO.getPhone());
+    public ClientDTO registerNewClient(RegisterDTO registerDTO) {
+        ClientDTO clientDTO = ClientDTO.builder()
+                .name(registerDTO.getName())
+                .surname(registerDTO.getSurname())
+                .email(registerDTO.getEmail())
+                .phone(registerDTO.getPhone())
+                .dni(registerDTO.getDni())
+                .phone(registerDTO.getPhone())
+                .build();
 
         CredentialEntity credentialEntity = new CredentialEntity();
         credentialEntity.setUsername(registerDTO.getUsername());
         credentialEntity.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
         credentialEntity.setRole(Role.CLIENT);
-        credentialEntity.setUser(clientService.save(clientEntity));
+        credentialEntity.setUser(clientService.save(clientDTO));
 
 
         credentialService.save(credentialEntity);
+        return clientDTO;
     }
 
     public void registerNewAdmin(RegisterDTO registerDTO) {
@@ -90,6 +95,7 @@ public class RegisterService {
 
         credentialService.save(credentialEntity);
     }
+
 
 
 }

@@ -2,6 +2,7 @@ package Pet.Society.services;
 
 import Pet.Society.models.dto.appointment.AppointmentDTO;
 import Pet.Society.models.dto.appointment.AppointmentUpdateDTO;
+import Pet.Society.models.dto.client.ClientDTO;
 import Pet.Society.models.dto.pet.AssingmentPetDTO;
 import Pet.Society.models.entities.AppointmentEntity;
 import Pet.Society.models.entities.ClientEntity;
@@ -48,12 +49,16 @@ public class AppointmentService {
         DoctorEntity findDoctor = this.doctorService.findById(appointmentDTO.getDoctor().getId());
 
 
-        AppointmentEntity appointment = new AppointmentEntity(
-                appointmentDTO.getStartTime()
-                , appointmentDTO.getEndTime(),
-                appointmentDTO.getReason(),
-                Status.AVAILABLE,
-                findDoctor,true);
+
+        AppointmentEntity appointment = AppointmentEntity.builder()
+                                        .startDate(appointmentDTO.getStartTime())
+                                        .endDate(appointmentDTO.getEndTime())
+                                        .reason(appointmentDTO.getReason())
+                                        .status(Status.AVAILABLE)
+                                        .doctor(findDoctor)
+                                        .approved(true)
+                                        .build();
+
         if (isOverlapping(appointment)) {
             throw new DuplicatedAppointmentException("The appointment already exists; it has the same hour.");
         }
@@ -136,7 +141,7 @@ public class AppointmentService {
     }
 
     public List<AppointmentEntity> getAllAppointmentsByClientId(long id) {
-        Optional<ClientEntity> client = Optional.ofNullable(this.clientService.findById(id));
+        Optional<ClientDTO> client = Optional.ofNullable(this.clientService.findById(id));
         if (client.isEmpty()) {
             throw new AppointmentDoesntExistException("Client does not exist");
         }
@@ -165,38 +170,6 @@ public class AppointmentService {
        return false;
     }
 
-    public void assignAppointmentToClient() {
-        List<ClientEntity> clients = clientService.getAllClients();
-        List<DoctorEntity> doctors = doctorService.getAllDoctors();
-        Random random = new Random();
-
-        for (ClientEntity client : clients) {
-            List<PetEntity> pets = client.getPets();
-            if (pets.isEmpty()) continue;
-
-            PetEntity pet = pets.get(random.nextInt(pets.size()));
-            DoctorEntity doctor = doctors.get(random.nextInt(doctors.size()));
-
-            LocalDateTime start = LocalDateTime.now().plusDays(random.nextInt(30) + 1);
-            LocalDateTime end = start.plusHours(1);
-
-            Reason randomReason = Reason.values()[random.nextInt(Reason.values().length)];
-            Status randomStatus = Status.values()[random.nextInt(Status.values().length)];
-
-            AppointmentEntity appointment = new AppointmentEntity(
-                start,
-                end,
-                randomReason,
-                randomStatus,
-                doctor,
-                true
-            );
-            appointment.setPet(pet);
-            appointment.setApproved(true);
-
-            appointmentRepository.save(appointment);
-        }
-    }
 
 
 

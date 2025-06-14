@@ -53,14 +53,15 @@ public class DiagnosesService {
             throw new IllegalArgumentException("the date entered is incorrect");
         }
 
-        DiagnosesEntity diagnosis = new DiagnosesEntity(
-                dto.getDiagnose(),
-                dto.getTreatment(),
-                appointment.getDoctor(),
-                appointment.getPet(),
-                appointment,
-                dto.getDate()
-        );
+        DiagnosesEntity diagnosis = DiagnosesEntity.builder()
+                .diagnose(dto.getDiagnose())
+                .treatment(dto.getTreatment())
+                .doctor(appointment.getDoctor())
+                .pet(appointment.getPet())
+                .appointment(appointment)
+                .date(dto.getDate())
+                .build();
+
         appointment.setStatus(Status.SUCCESSFULLY);
         appointment.setDiagnoses(diagnosis);
         this.diagnosesRepository.save(diagnosis);
@@ -82,8 +83,7 @@ public class DiagnosesService {
                     diagnosis.getPet().getId(),
                     diagnosis.getAppointment().getId(),
                     diagnosis.getDate());
-        }
-        else {
+        } else {
             throw new DiagnosesNotFoundException("Diagnosis " + id + " not found");
         }
     }
@@ -92,7 +92,7 @@ public class DiagnosesService {
         if (diagnosesRepository.findByPetId(id, pageable).isEmpty()) {
             throw new DiagnosesNotFoundException("Diagnoses of Pet id : " + id + " not found");
         }
-        return diagnosesRepository.findByPetId(id,pageable).map(diagnosesEntity -> new DiagnosesDTOResponse(diagnosesEntity.getDiagnose(),
+        return diagnosesRepository.findByPetId(id, pageable).map(diagnosesEntity -> new DiagnosesDTOResponse(diagnosesEntity.getDiagnose(),
                 diagnosesEntity.getTreatment(),
                 diagnosesEntity.getDoctor().getId(),
                 diagnosesEntity.getPet().getId(),
@@ -102,7 +102,7 @@ public class DiagnosesService {
     }
 
     public Page<DiagnosesDTOResponse> findAll(Pageable pageable) {
-        return diagnosesRepository.findAll(pageable).map(diagnoses-> new DiagnosesDTOResponse(diagnoses.getDiagnose(),
+        return diagnosesRepository.findAll(pageable).map(diagnoses -> new DiagnosesDTOResponse(diagnoses.getDiagnose(),
                 diagnoses.getTreatment(),
                 diagnoses.getDoctor().getId(),
                 diagnoses.getPet().getId(),
@@ -124,45 +124,4 @@ public class DiagnosesService {
                 diagnoses.getDate()
         ));
     }
-
-
-
-   public void assignRandomDiagnosesToAppointments() {
-       List<AppointmentEntity> appointments = appointmentRepository.findAll();
-       List<DoctorEntity> doctors = doctorRepository.findAll();
-       List<PetEntity> pets = petRepository.findAll();
-       Random random = new Random();
-
-       for (AppointmentEntity appointment : appointments) {
-           if (diagnosesRepository.findByAppointment(appointment).isPresent()) {
-               continue;
-           }
-
-           String[] posiblesDiagnosticos = {"Gripe", "Fractura", "Alergia", "Infección"};
-           String[] posiblesTratamientos = {"Reposo", "Antibióticos", "Cirugía", "Vacuna"};
-
-           String diagnose = posiblesDiagnosticos[random.nextInt(posiblesDiagnosticos.length)];
-           String treatment = posiblesTratamientos[random.nextInt(posiblesTratamientos.length)];
-           DoctorEntity doctor = doctors.get(random.nextInt(doctors.size()));
-           PetEntity pet = pets.get(random.nextInt(pets.size()));
-           LocalDateTime date = LocalDateTime.now().minusDays(random.nextInt(30));
-
-           DiagnosesEntity diagnoses = new DiagnosesEntity(
-                   diagnose,
-                   treatment,
-                   doctor,
-                   pet,
-                   appointment,
-                   date
-           );
-
-           diagnosesRepository.save(diagnoses);
-
-           appointment.setDiagnoses(diagnoses);
-           appointmentRepository.save(appointment);
-       }
-   }
-
-
-
 }

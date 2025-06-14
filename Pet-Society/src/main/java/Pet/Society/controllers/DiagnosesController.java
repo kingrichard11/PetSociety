@@ -171,10 +171,6 @@ public class DiagnosesController {
         return ResponseEntity.ok(diagnosesService.findByDoctorId(id, pageable));
     }
 
-    @PostMapping("/assignRandom")
-    public ResponseEntity<String> assignRandomDiagnosesToAppointments() {
-        diagnosesService.assignRandomDiagnosesToAppointments();
-        return ResponseEntity.ok("Se asignaron diagnósticos aleatorios correctamente.");
-    }
+
 
 }

@@ -191,11 +191,5 @@ public class AppointmentController {
         return ResponseEntity.ok(this.appointmentService.getAllAppointmentsByDoctorId(doctorId));
     }
 
-    @PostMapping("/assignRandom")
-    public ResponseEntity<String> assignRandomPastAppointmentsToClients() {
-        appointmentService.assignAppointmentToClient();
-        return ResponseEntity.ok("Se asignó una cita aleatoria a cada cliente.");
-    }
-
 
 }

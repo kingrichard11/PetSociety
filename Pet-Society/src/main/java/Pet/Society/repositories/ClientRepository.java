@@ -3,6 +3,8 @@ package Pet.Society.repositories;
 import Pet.Society.models.entities.ClientEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springdoc.core.converters.models.Pageable;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import org.springframework.data.jpa.repository.Query;
@@ -24,7 +26,6 @@ import static java.sql.DriverManager.getConnection;
 
 @Repository
 public interface ClientRepository extends JpaRepository<ClientEntity, Long> {
-
 
     Optional<ClientEntity> findByDni(String dni);
 }

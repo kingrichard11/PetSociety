@@ -10,6 +10,9 @@ import Pet.Society.repositories.ClientRepository;
 import com.mysql.cj.xdevapi.Client;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.http.client.ClientHttpRequestFactorySettings;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -24,20 +27,21 @@ public class ClientService implements Mapper <ClientDTO, ClientEntity> {
     private final ClientRepository clientRepository;
 
 
+
     @Autowired
     public ClientService(ClientRepository clientRepository) {
         this.clientRepository = clientRepository;
 
     }
 
-    public ClientDTO save(ClientDTO clientDTO) {
+    public ClientEntity save(ClientDTO clientDTO) {
         Optional<ClientEntity> clientEntity= this.clientRepository.findByDni(clientDTO.getDni());
           if(clientEntity.isPresent()) {
               throw new UserExistsException("User already exists");
           }
         ClientEntity clientToSave = toEntity(clientDTO);
-          this.clientRepository.save(clientToSave);
-          return clientDTO;
+
+          return this.clientRepository.save(clientToSave);
     }
 
     public ClientDTO findById(long id) {
@@ -53,6 +57,7 @@ public class ClientService implements Mapper <ClientDTO, ClientEntity> {
             throw new UserNotFoundException("User does not exist");
         }
         ClientEntity clientToUpdate = toEntity(clientToModify);
+        clientToUpdate.setId(id);
         takeAttributes(clientToUpdate, existingClient.get());
         this.clientRepository.save(clientToUpdate);
         return clientToModify;
@@ -68,12 +73,12 @@ public class ClientService implements Mapper <ClientDTO, ClientEntity> {
         this.clientRepository.save(clientToUnsubscribe);
     }
 
-    public ClientEntity findByDNI(String DNI){
-        return this.clientRepository.findByDni(DNI).orElseThrow(()-> new UserExistsException("User does not exist"));
+    public ClientDTO findByDNI(String DNI){
+        return toDTO(this.clientRepository.findByDni(DNI).orElseThrow(()-> new UserExistsException("User does not exist")));
     }
 
     public ClientDTO takeAttributes(ClientEntity origin, ClientEntity destination) {
-        if(origin.getName() == null){origin.setPhone(destination.getPhone());}
+        if(origin.getName() == null){origin.setName(destination.getName());}
         if(origin.getSurname() == null){origin.setSurname(destination.getSurname());}
         if(origin.getEmail() == null){origin.setEmail(destination.getEmail());}
         if(origin.getDni() == null){origin.setDni(destination.getDni());}
@@ -82,14 +87,23 @@ public class ClientService implements Mapper <ClientDTO, ClientEntity> {
         return toDTO(destination);
     }
 
-    public List<ClientEntity> getAllClients() {
-        List<ClientEntity> clients = this.clientRepository.findAll();
-        if (clients.isEmpty()) {
-            throw new UserNotFoundException("No clients found");
-        }
-        return clients;
-    }
+    public Page<ClientDTO> getAllClients(Pageable pageable) {
 
+        Page<ClientEntity> clients = this.clientRepository.findAll(pageable);
+
+        if(!clients.hasContent()){
+            return Page.empty();
+        }
+
+        return clients.map(clientEntity
+                -> ClientDTO.builder().name(clientEntity.getName())
+                                     .surname(clientEntity.getSurname())
+                                     .phone(clientEntity.getPhone())
+                                     .dni(clientEntity.getDni())
+                                     .email(clientEntity.getEmail())
+                                     .build());
+
+    }
 
     @Override
     public ClientEntity toEntity(ClientDTO dto) {

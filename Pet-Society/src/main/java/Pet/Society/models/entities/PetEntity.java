@@ -8,12 +8,14 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @AllArgsConstructor
 @Data
 @NoArgsConstructor
+@SuperBuilder
 public class PetEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

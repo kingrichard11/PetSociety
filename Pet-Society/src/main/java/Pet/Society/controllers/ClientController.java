@@ -1,5 +1,6 @@
 package Pet.Society.controllers;
 
+import Pet.Society.models.dto.client.ClientDTO;
 import Pet.Society.models.entities.AppointmentEntity;
 import Pet.Society.models.entities.ClientEntity;
 import Pet.Society.services.ClientService;
@@ -13,11 +14,15 @@ import jakarta.validation.Valid;
 import org.apache.coyote.Response;
 import org.aspectj.apache.bcel.classfile.Module;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @Tag(
@@ -59,7 +64,7 @@ public class ClientController {
             }
     )
     @PatchMapping("/update/{id}")
-    public ResponseEntity<ClientEntity> update(@RequestBody ClientEntity client, @PathVariable long id) {
+    public ResponseEntity<ClientDTO> update(@RequestBody ClientDTO client, @PathVariable long id) {
             this.clientService.update(client,id);
             return ResponseEntity.ok(client);
     }
@@ -86,7 +91,7 @@ public class ClientController {
                     )
             }
     )
-    @PatchMapping("/unsubscribe/{id}")
+    @DeleteMapping("/unsubscribe/{id}")
     public ResponseEntity<String> unsubscribe(@PathVariable long id) {
         this.clientService.unSubscribe(id);
         return ResponseEntity.status(HttpStatus.OK).body("Client unsubscribed successfully");
@@ -115,7 +120,7 @@ public class ClientController {
             }
     )
     @GetMapping("/findByDni/{dni}")
-    public ResponseEntity<ClientEntity> findByDni(@PathVariable String dni){
+    public ResponseEntity<ClientDTO> findByDni(@PathVariable String dni){
         return ResponseEntity.ok(this.clientService.findByDNI(dni));
     }
 
@@ -142,12 +147,12 @@ public class ClientController {
             }
     )
     @GetMapping("/findById/{id}")
-    public ResponseEntity<ClientEntity> findById(@PathVariable long id) {
+    public ResponseEntity<ClientDTO> findById(@PathVariable long id) {
         return ResponseEntity.ok(this.clientService.findById(id));
     }
 
-
-
-
-
+    @GetMapping("/getAll")
+    public ResponseEntity<Page<ClientDTO>> getAll(@PageableDefault(size = 10, page = 0)Pageable pageable) {
+        return ResponseEntity.ok(this.clientService.getAllClients(pageable));
+    }
 }

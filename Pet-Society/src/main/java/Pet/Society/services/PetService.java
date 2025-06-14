@@ -5,6 +5,7 @@ import Pet.Society.models.entities.ClientEntity;
 import Pet.Society.models.entities.PetEntity;
 import Pet.Society.models.exceptions.PetNotFoundException;
 import Pet.Society.models.exceptions.UserNotFoundException;
+import Pet.Society.models.interfaces.Mapper;
 import Pet.Society.repositories.ClientRepository;
 import Pet.Society.repositories.PetRepository;
 import com.github.javafaker.Faker;
@@ -18,7 +19,7 @@ import java.util.List;
 
 
 @Service
-public class PetService {
+public class PetService implements Mapper<PetDTO, PetEntity> {
 
     private final PetRepository petRepository;
     private final ClientRepository clientRepository;
@@ -30,7 +31,7 @@ public class PetService {
     }
 
 
-    public PetEntity createPet(PetDTO dto) {
+    public PetDTO createPet(PetDTO dto) {
         ClientEntity client = clientRepository.findById(dto.getClientId())
                 .orElseThrow(() -> new UserNotFoundException("Cliente with ID " + dto.getClientId() + " not found."));
 
@@ -39,16 +40,18 @@ public class PetService {
         pet.setAge(dto.getAge());
         pet.setActive(dto.isActive());
         pet.setClient(client);
+        petRepository.save(pet);
 
-        return petRepository.save(pet);
+        return dto;
     }
 
 
-
+    //CORREGIR
     public PetEntity updatePet(Long id,PetDTO pet) {
         PetEntity existingPet = petRepository.findById(id)
                 .orElseThrow(() -> new PetNotFoundException("La mascota con ID: " + id + " no existe."));
 
+        //MODULARIZAR ESTA COSA HORRIBLE
         /**Validar y actualizar cada campo*/
         if (pet.getName() != null) {
             existingPet.setName(pet.getName());
@@ -115,5 +118,26 @@ public class PetService {
             }
         }
         petRepository.saveAll(petsToSave);
+    }
+
+
+    @Override
+    public PetEntity toEntity(PetDTO dto) {
+        return PetEntity.builder()
+                .name(dto.getName())
+                .age(dto.getAge())
+                .active(dto.isActive())
+                .client(this.clientRepository.findById(dto.getClientId()).get())
+                .build();
+    }
+
+    @Override
+    public PetDTO toDTO(PetEntity entity) {
+        return PetDTO.builder()
+                .name(entity.getName())
+                .age(entity.getAge())
+                .active(entity.isActive())
+                .clientId(entity.getClient().getId())
+                .build();
     }
 }

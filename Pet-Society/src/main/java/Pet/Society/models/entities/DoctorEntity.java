@@ -8,11 +8,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @AllArgsConstructor
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @Table(name="doctors")
 public class DoctorEntity extends UserEntity{

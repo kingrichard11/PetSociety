@@ -29,7 +29,7 @@ public class RegisterDTO {
     @Email
     @NotNull
     private String email;
-    @NotNull
+
     @Enumerated(EnumType.STRING)
     private Speciality speciality;
 

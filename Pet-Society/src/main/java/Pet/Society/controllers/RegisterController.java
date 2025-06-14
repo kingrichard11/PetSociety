@@ -1,5 +1,6 @@
 package Pet.Society.controllers;
 
+import Pet.Society.models.dto.client.ClientDTO;
 import Pet.Society.models.dto.register.RegisterDTO;
 import Pet.Society.services.RegisterService;
 import jakarta.validation.Valid;
@@ -50,9 +51,8 @@ public class RegisterController {
             }
     )
     @PostMapping("/new/client")
-    public ResponseEntity<String> registerClient(@Valid @RequestBody RegisterDTO dto) {
-        registerService.registerNewClient(dto);
-        return ResponseEntity.ok("Successfully registered user");
+    public ResponseEntity<ClientDTO> registerClient(@Valid @RequestBody RegisterDTO dto) {
+        return ResponseEntity.ok( registerService.registerNewClient(dto));
     }
 
     @Operation(
