@@ -16,6 +16,8 @@ public class CredentialService implements UserDetailsService {
 
     private final CredentialRepository credentialRepository;
 
+    //ALL OF THIS METHOD MUST BE NEED FOR OPERATIONAL FUNCTIONS. NOT FOR CONTROLLER!!
+
     @Autowired
     public CredentialService(CredentialRepository credentialRepository) {
         this.credentialRepository = credentialRepository;

@@ -18,6 +18,7 @@ public class PetDTO {
     @Positive
     private int age;
     private boolean active = true;
+    @NotNull
     private Long clientId;
 
 

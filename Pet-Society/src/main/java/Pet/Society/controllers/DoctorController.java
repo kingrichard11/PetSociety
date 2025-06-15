@@ -1,5 +1,6 @@
 package Pet.Society.controllers;
 
+import Pet.Society.models.dto.doctor.DoctorDTO;
 import Pet.Society.models.entities.DoctorEntity;
 import Pet.Society.services.DoctorService;
 import jakarta.persistence.EntityNotFoundException;
@@ -49,9 +50,8 @@ public class DoctorController {
             }
     )
     @PostMapping("/create")
-    public ResponseEntity<DoctorEntity> createDoctor(@Valid @RequestBody DoctorEntity doctor) {
-        DoctorEntity doctorEntity = doctorService.save(doctor);
-        return new ResponseEntity<>(doctorEntity, HttpStatus.CREATED);
+    public ResponseEntity<DoctorEntity> createDoctor(@Valid @RequestBody DoctorDTO doctor) {
+        return new ResponseEntity<>(doctorService.save(doctor), HttpStatus.CREATED);
     }
 
     @Operation(
@@ -71,9 +71,9 @@ public class DoctorController {
             }
     )
     @PatchMapping("/update/{id}")
-    public ResponseEntity<DoctorEntity> updateDoctor(@Valid @RequestBody DoctorEntity doctor, @PathVariable Long id) {
-        doctorService.update(doctor, id);
-        return new ResponseEntity<>(doctor, HttpStatus.OK);
+    public ResponseEntity<DoctorDTO> updateDoctor(@Valid @RequestBody DoctorDTO doctor, @PathVariable Long id) {
+
+        return new ResponseEntity<>(doctorService.update(doctor, id), HttpStatus.OK);
     }
 
     @Operation(
@@ -93,9 +93,9 @@ public class DoctorController {
             }
     )
     @PatchMapping("/unsubscribe/{id}")
-    public ResponseEntity<DoctorEntity> unsuscribe(@PathVariable Long id) {
+    public ResponseEntity<String> unsuscribe(@PathVariable Long id) {
         doctorService.unSubscribe(id);
-        return new ResponseEntity<>(null, HttpStatus.OK);
+        return ResponseEntity.ok("Unsubscribed successfully");
     }
 
     @Operation(
@@ -115,9 +115,8 @@ public class DoctorController {
             }
     )
     @GetMapping("/find/{id}")
-    public ResponseEntity<DoctorEntity> findById(@PathVariable Long id) {
-        DoctorEntity doctor = doctorService.findById(id);
-        return new ResponseEntity<>(doctor, HttpStatus.OK);
+    public ResponseEntity<DoctorDTO> findById(@PathVariable Long id) {
+        return new ResponseEntity<>(doctorService.findById(id), HttpStatus.OK);
     }
 
     @Operation(
@@ -137,9 +136,8 @@ public class DoctorController {
             }
     )
     @GetMapping("/find/dni/{dni}")
-    public ResponseEntity<DoctorEntity> findByDNI (@PathVariable String dni){
-        DoctorEntity doctor = doctorService.findByDni(dni);
-        return new ResponseEntity<>(doctor, HttpStatus.OK);
+    public ResponseEntity<DoctorDTO> findByDNI (@PathVariable String dni){
+        return new ResponseEntity<>(doctorService.findByDni(dni), HttpStatus.OK);
     }
 
 }

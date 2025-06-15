@@ -69,28 +69,16 @@ public class PetService implements Mapper<PetDTO, PetEntity> {
         this.petRepository.save(pet);
     }
 
-    //NOT WORKS
+    //WORKS BUT IT'S NEED ALWAYS THE clientID from petDTO
     public PetEntity takeAttributes(PetEntity origin, PetEntity detination){
-        if (origin.getName() != null) {
-            detination.setName(origin.getName());
-        }
-        if (origin.getAge() != 0) {
-            detination.setAge(origin.getAge());
-        }
 
-        if (origin.getClient() != null){
-            ClientEntity client = clientRepository.findById(origin.getClient().getId())
-                    .orElseThrow(() -> new UserNotFoundException("Cliente con ID " + origin.getClient().getId() + " no encontrado."));
-            detination.setClient(client);
-        }
-
-        if (origin.isActive() != detination.isActive()) {
-            detination.setActive(origin.isActive());
-        }
+        if (origin.getName() != null) {detination.setName(origin.getName());}
+        if (origin.getAge() != 0) {detination.setAge(origin.getAge());}
+        if (origin.getClient() == null){origin.setClient(detination.getClient());}
+        if (origin.isActive() != detination.isActive()) {detination.setActive(origin.isActive());}
 
         return detination;
     }
-
 
     public PetDTO getPetById(Long id) {
         return toDTO(petRepository.findById(id)

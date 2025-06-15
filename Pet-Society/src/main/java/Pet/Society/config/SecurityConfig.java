@@ -52,7 +52,7 @@ public class SecurityConfig {
                         //REGISTRARSE Y LOGUEARSE
                         .requestMatchers(HttpMethod.POST,"/register/new/client").permitAll()
                         .requestMatchers(HttpMethod.POST,"/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/register/new/admin").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST,"/register/new/admin").permitAll()
                         //ACCESS TO PETS
                         .requestMatchers("/pet/**").hasAnyRole("ADMIN","CLIENT")
                         //ACCESS TO CLIENTS
@@ -72,7 +72,7 @@ public class SecurityConfig {
                         .requestMatchers("/diagnoses/assignRandom").hasRole("ADMIN")
                         .requestMatchers("/diagnoses/create").hasRole("DOCTOR")
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() //For use correctly the OPENAPI
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
 
                 )
                 .exceptionHandling(ex -> ex

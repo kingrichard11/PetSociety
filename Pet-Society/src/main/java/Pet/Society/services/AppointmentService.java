@@ -47,7 +47,7 @@ public class AppointmentService {
 
         /// FALTA POR TOCAR, ES POSIBLE QUE SE NECESITE UN DTO
     public AppointmentEntity save (AppointmentDTO appointmentDTO) {
-        DoctorEntity findDoctor = this.doctorService.findById(appointmentDTO.getDoctor().getId());
+        DoctorEntity findDoctor = this.doctorService.findById1(appointmentDTO.getDoctor().getId());
 
 
 
