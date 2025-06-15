@@ -4,6 +4,7 @@ import Pet.Society.models.dto.appointment.AppointmentDTO;
 import Pet.Society.models.dto.appointment.AppointmentUpdateDTO;
 import Pet.Society.models.dto.client.ClientDTO;
 import Pet.Society.models.dto.pet.AssingmentPetDTO;
+import Pet.Society.models.dto.pet.PetDTO;
 import Pet.Society.models.entities.AppointmentEntity;
 import Pet.Society.models.entities.ClientEntity;
 import Pet.Society.models.entities.DoctorEntity;
@@ -78,7 +79,7 @@ public class AppointmentService {
             throw new UnavailableAppointmentException("The client has an unpaid appointment");
         }
 
-        PetEntity findPet = this.petService.getPetById(dto.getPetId());
+        PetEntity findPet = this.petService.findById(dto.getPetId());
 
         findAppointment.setPet(findPet);
 
@@ -117,7 +118,7 @@ public class AppointmentService {
         }
 
         if (appointmentUpdateDTO.getPetId() != null) {
-            PetEntity pet = this.petService.getPetById(appointmentUpdateDTO.getPetId());
+            PetEntity pet = this.petService.findById(appointmentUpdateDTO.getPetId());
             appointmentToUpdate.setPet(pet);
         }
 

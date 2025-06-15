@@ -28,6 +28,11 @@ public class GlobalControllerException {
         return createProblemDetail(HttpStatus.CONFLICT, "User Exists", "The user already exists", request);
     }
 
+    @ExceptionHandler(NoPetsException.class)
+    public ProblemDetail HandlerNoPetsException(UserExistsException ex, HttpServletRequest request) {
+        return createProblemDetail(HttpStatus.CONFLICT, "No Pets Exception", "The client doesn't have pets", request);
+    }
+
     @ExceptionHandler(UserNotFoundException.class)
     public ProblemDetail HandlerUserNotFoundException(UserNotFoundException ex, HttpServletRequest request) {
         return createProblemDetail(HttpStatus.NOT_FOUND, "User Not Found", "The user does not exist", request);

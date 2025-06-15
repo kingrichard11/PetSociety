@@ -55,9 +55,8 @@ public class PetController {
             }
     )
     @PostMapping("/create")
-    public ResponseEntity<PetEntity> createPet(@Valid @RequestBody PetDTO dto) {
-        PetEntity createdPet = petService.createPet(dto);
-        return new ResponseEntity<>(createdPet, HttpStatus.CREATED);
+    public ResponseEntity<PetDTO> createPet(@Valid @RequestBody PetDTO dto) {
+        return ResponseEntity.ok(petService.createPet(dto));
     }
 
     @Operation(
@@ -82,9 +81,8 @@ public class PetController {
             }
     )
     @PatchMapping("/update/{id}")
-    public ResponseEntity<PetEntity> updatePet(@PathVariable Long id, @RequestBody PetDTO dto) {
-        PetEntity updatedPet = petService.updatePet(id, dto);
-        return new ResponseEntity<>(updatedPet, HttpStatus.OK);
+    public ResponseEntity<PetDTO> updatePet(@PathVariable Long id, @RequestBody PetDTO dto) {
+        return ResponseEntity.ok(petService.updatePet(id, dto));
     }
 
     @Operation(
@@ -108,18 +106,11 @@ public class PetController {
                     )
             }
     )
-    @PatchMapping("/deleteActive/{id}")
-    public ResponseEntity<PetEntity> deleteActive(@PathVariable Long id) {
-
-        PetEntity pet = petService.getPetById(id);
-        PetDTO dto = new PetDTO(
-                pet.getName(),
-                pet.getAge(),
-                false,
-                pet.getClient().getId()
-        );
-        PetEntity petEntity = petService.updatePet(id, dto);
-        return ResponseEntity.ok(petEntity);
+    @DeleteMapping("/deleteActive/{id}")
+    //NOT WORKS
+    public ResponseEntity<String> deleteActive(@PathVariable Long id) {
+        this.petService.deletePet(id);
+        return ResponseEntity.ok("Pet unsubscribed successfully");
     }
 
 
@@ -145,16 +136,9 @@ public class PetController {
             }
     )
     @GetMapping("/findByID/{id}")
-    public ResponseEntity<PetDTO> getPetById(@PathVariable Long id) {
 
-        PetEntity pet = petService.getPetById(id);
-        PetDTO dto = new PetDTO(
-                pet.getName(),
-                pet.getAge(),
-                pet.isActive(),
-                pet.getClient().getId()
-        );
-        return new ResponseEntity<>(dto, HttpStatus.OK);
+    public ResponseEntity<PetDTO> getPetById(@PathVariable Long id) {
+        return ResponseEntity.ok(petService.getPetById(id));
     }
 
     @Operation(
@@ -173,25 +157,14 @@ public class PetController {
     )
     @GetMapping("/findAllByClientId/{id}")
     public ResponseEntity<List<PetDTO>> getAllPetsByClientId(@PathVariable("id") Long id) {
+        return new ResponseEntity<>(this.petService.getAllPetsByClientId(id), HttpStatus.OK);
+    }
 
-        Iterable<PetEntity> pets = petService.getAllPetsByClientId(id);
-        List<PetDTO> dtos = new ArrayList<>();
-        for (PetEntity pet : pets) {
-            dtos.add(new PetDTO(
-                    pet.getName(),
-                    pet.getAge(),
-                    pet.isActive(),
-                    pet.getClient().getId()
-            ));
-        }
-        return new ResponseEntity<>(dtos, HttpStatus.OK);
+    @GetMapping("/seeMyPets/{dni}")
+    public ResponseEntity<List<PetDTO>> SeeMyPets(@PathVariable("dni") String dni) {
+        return ResponseEntity.ok(this.petService.seeMyPets(dni));
     }
 
 
-    @PostMapping("/assignPets")
-    public ResponseEntity<String> assignSamplePets() {
-        petService.assignPetsToClients();
-        return ResponseEntity.ok("Se asignaron 2 mascotas a cada cliente.");
-    }
 
 }

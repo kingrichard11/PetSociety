@@ -1,8 +1,10 @@
 package Pet.Society.services;
 
+import Pet.Society.models.dto.client.ClientDTO;
 import Pet.Society.models.dto.pet.PetDTO;
 import Pet.Society.models.entities.ClientEntity;
 import Pet.Society.models.entities.PetEntity;
+import Pet.Society.models.exceptions.NoPetsException;
 import Pet.Society.models.exceptions.PetNotFoundException;
 import Pet.Society.models.exceptions.UserNotFoundException;
 import Pet.Society.models.interfaces.Mapper;
@@ -10,12 +12,15 @@ import Pet.Society.repositories.ClientRepository;
 import Pet.Society.repositories.PetRepository;
 import com.github.javafaker.Faker;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -35,6 +40,10 @@ public class PetService implements Mapper<PetDTO, PetEntity> {
         ClientEntity client = clientRepository.findById(dto.getClientId())
                 .orElseThrow(() -> new UserNotFoundException("Cliente with ID " + dto.getClientId() + " not found."));
 
+        List<PetEntity> pets = petRepository.findAllByClient(client);
+        if(pets.size()>4){
+            throw new PetNotFoundException("The client can have 5 pets");
+        }
         PetEntity pet = new PetEntity();
         pet.setName(dto.getName());
         pet.setAge(dto.getAge());
@@ -47,79 +56,94 @@ public class PetService implements Mapper<PetDTO, PetEntity> {
 
 
     //CORREGIR
-    public PetEntity updatePet(Long id,PetDTO pet) {
+    public PetDTO updatePet(Long id,PetDTO pet) {
         PetEntity existingPet = petRepository.findById(id)
                 .orElseThrow(() -> new PetNotFoundException("La mascota con ID: " + id + " no existe."));
+                takeAttributes(toEntity(pet),existingPet);
+                return toDTO(petRepository.save(existingPet));
+    }
 
-        //MODULARIZAR ESTA COSA HORRIBLE
-        /**Validar y actualizar cada campo*/
-        if (pet.getName() != null) {
-            existingPet.setName(pet.getName());
+    public void deletePet(Long id) {
+        PetEntity pet =petRepository.findById(id).orElseThrow(() -> new PetNotFoundException("The pet with " + id + " was not found."));
+        pet.setActive(false);
+        this.petRepository.save(pet);
+    }
+
+    //NOT WORKS
+    public PetEntity takeAttributes(PetEntity origin, PetEntity detination){
+        if (origin.getName() != null) {
+            detination.setName(origin.getName());
         }
-        if (pet.getAge() != 0) {
-            existingPet.setAge(pet.getAge());
+        if (origin.getAge() != 0) {
+            detination.setAge(origin.getAge());
         }
 
-        if (pet.getClientId() != null){
-            ClientEntity client = clientRepository.findById(pet.getClientId())
-                    .orElseThrow(() -> new UserNotFoundException("Cliente con ID " + pet.getClientId() + " no encontrado."));
-            existingPet.setClient(client);
+        if (origin.getClient() != null){
+            ClientEntity client = clientRepository.findById(origin.getClient().getId())
+                    .orElseThrow(() -> new UserNotFoundException("Cliente con ID " + origin.getClient().getId() + " no encontrado."));
+            detination.setClient(client);
         }
 
-        if (pet.isActive() != existingPet.isActive()) {
-            existingPet.setActive(pet.isActive());
+        if (origin.isActive() != detination.isActive()) {
+            detination.setActive(origin.isActive());
         }
-        return petRepository.save(existingPet);
+
+        return detination;
     }
 
 
-
-    public PetEntity getPetById(Long id) {
-        return petRepository.findById(id)
-                .orElseThrow(() -> new PetNotFoundException("the pet doesn't exist with ID: " + id));
-
+    public PetDTO getPetById(Long id) {
+        return toDTO(petRepository.findById(id)
+                .orElseThrow(() -> new PetNotFoundException("the pet doesn't exist with ID: " + id)));
     }
 
-    public Optional<ClientEntity> getOwnerByPetId(Long id) {
+    public PetEntity findById(Long id) {
+        return this.petRepository.findById(id).orElseThrow(() -> new PetNotFoundException("the pet doesn't exist with ID: " + id));
+    }
+
+    public Optional<ClientDTO> getOwnerByPetId(Long id) {
         PetEntity pet = petRepository.findById(id)
                 .orElseThrow(() -> new PetNotFoundException("The pet doesn't exist with ID: " + id));
-        return Optional.ofNullable(pet.getClient());
+        return Optional.ofNullable(ClientDTO.builder().dni(pet.getClient().getName())
+                .surname(pet.getClient().getSurname())
+                .phone(pet.getClient().getPhone())
+                .dni(pet.getClient().getDni())
+                .email(pet.getClient().getEmail())
+                .build());
     }
 
     public boolean existsPetById(Long id) {
         return petRepository.existsById(id);
     }
 
-
-    public Iterable<PetEntity> getAllPets() {
-        return petRepository.findAll();
-    }
-
-    public Iterable<PetEntity> getAllPetsByClientId(Long clientId) {
-        ClientEntity client = clientRepository.findById(clientId)
-                .orElseThrow(() -> new UserNotFoundException("Cliente con ID " + clientId + " no encontrado."));
-
-        return petRepository.findAllByClient(client);
-    }
-
-    public void assignPetsToClients() {
-        Faker faker = new Faker();
-        List<PetEntity> petsToSave = new ArrayList<>();
-        Iterable<ClientEntity> clients = clientRepository.findAll();
-
-        for (ClientEntity client : clients) {
-            for (int i = 0; i < 2; i++) {
-                PetEntity pet = new PetEntity();
-                pet.setName(faker.animal().name());
-                pet.setAge(faker.number().numberBetween(1, 15));
-                pet.setActive(true);
-                pet.setClient(client);
-                petsToSave.add(pet);
-            }
+    public Page<PetDTO> getAllPets(Pageable pageable) {
+        Page<PetEntity> pets = this.petRepository.findAll(pageable);
+        if(pets.isEmpty()){
+            throw new PetNotFoundException("Theres no pets found");
         }
-        petRepository.saveAll(petsToSave);
+        return pets.map(this::toDTO);
     }
 
+    public List<PetDTO> seeMyPets(String dni){
+      List<PetDTO> pets = this.petRepository.findAllByClient_Dni(dni).stream().map(this::toDTO).toList();
+      if(pets.isEmpty()){
+          throw new NoPetsException("Theres no pets found");
+      }
+      return pets;
+    }
+
+    public List<PetDTO> getAllPetsByClientId(Long clientId) {
+        ClientEntity client = clientRepository.findById(clientId)
+                .orElseThrow(() -> new UserNotFoundException("Client with id: " + clientId + " was not found."));
+
+        List<PetEntity> pets = petRepository.findAllByClient(client);
+
+        if(pets.isEmpty()){
+            throw new NoPetsException("The client " + client.getName() + "doesn't have pets");
+        }
+
+        return pets.stream().map(this::toDTO).toList();
+    }
 
     @Override
     public PetEntity toEntity(PetDTO dto) {

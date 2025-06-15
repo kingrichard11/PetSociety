@@ -6,6 +6,7 @@ import jakarta.persistence.OneToMany;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -15,10 +16,9 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @SuperBuilder
+
 public class ClientEntity extends UserEntity {
     private Boolean foundation = true;
     @OneToMany(mappedBy = "client")
-    private List<PetEntity> pets;
-
-
+    private List<PetEntity> pets = new ArrayList<>(4);
 }

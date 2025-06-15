@@ -14,19 +14,14 @@ import org.springframework.boot.http.client.ClientHttpRequestFactorySettings;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
 
 
-
-import java.util.List;
 import java.util.Optional;
 
 @Service
 public class ClientService implements Mapper <ClientDTO, ClientEntity> {
 
     private final ClientRepository clientRepository;
-
-
 
     @Autowired
     public ClientService(ClientRepository clientRepository) {
@@ -88,9 +83,7 @@ public class ClientService implements Mapper <ClientDTO, ClientEntity> {
     }
 
     public Page<ClientDTO> getAllClients(Pageable pageable) {
-
         Page<ClientEntity> clients = this.clientRepository.findAll(pageable);
-
         if(!clients.hasContent()){
             return Page.empty();
         }
