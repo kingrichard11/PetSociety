@@ -2,15 +2,14 @@ package Pet.Society.models.dto.client;
 
 import Pet.Society.models.dto.pet.PetDTO;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.List;
 
 @AllArgsConstructor
 @Data
-@Getter
-@Setter
 @NoArgsConstructor
-@Builder
+@SuperBuilder
 
 public class ClientDTO {
     private String name;

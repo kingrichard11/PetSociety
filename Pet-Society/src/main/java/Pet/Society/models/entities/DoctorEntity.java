@@ -4,15 +4,13 @@ import Pet.Society.models.enums.Speciality;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 @Entity
 @AllArgsConstructor
-@Data
+@Getter
+@Setter
 @SuperBuilder
 @NoArgsConstructor
 @Table(name="doctors")

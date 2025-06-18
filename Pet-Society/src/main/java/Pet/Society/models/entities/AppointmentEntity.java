@@ -5,17 +5,15 @@ import Pet.Society.models.enums.Status;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Future;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 @Entity
 @Table(name = "appointments")
 @AllArgsConstructor
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @SuperBuilder
 public class AppointmentEntity {

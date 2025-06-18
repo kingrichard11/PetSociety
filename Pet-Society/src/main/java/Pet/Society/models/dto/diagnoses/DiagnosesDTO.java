@@ -4,9 +4,17 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Pattern;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+@SuperBuilder
 public class DiagnosesDTO {
 
     @NotBlank
@@ -24,49 +32,5 @@ public class DiagnosesDTO {
     @PastOrPresent
     private LocalDateTime date;
 
-    public DiagnosesDTO() {
-    }
 
-    public DiagnosesDTO(String diagnose, String treatment, Long appointmentId, LocalDateTime date) {
-        this.diagnose = diagnose;
-        this.treatment = treatment;
-        this.appointmentId = appointmentId;
-        this.date = date;
-    }
-
-    public String getDiagnose() {
-        return diagnose;
-    }
-
-    public DiagnosesDTO setDiagnose(String diagnose) {
-        this.diagnose = diagnose;
-        return this;
-    }
-
-    public String getTreatment() {
-        return treatment;
-    }
-
-    public DiagnosesDTO setTreatment(String treatment) {
-        this.treatment = treatment;
-        return this;
-    }
-
-    public Long getAppointmentId() {
-        return appointmentId;
-    }
-
-    public DiagnosesDTO setAppointmentId(Long appointmentId) {
-        this.appointmentId = appointmentId;
-        return this;
-    }
-
-    public LocalDateTime getDate() {
-        return date;
-    }
-
-    public DiagnosesDTO setDate(LocalDateTime date) {
-        this.date = date;
-        return this;
-    }
 }

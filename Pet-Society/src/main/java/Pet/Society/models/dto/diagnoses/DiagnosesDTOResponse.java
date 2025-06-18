@@ -4,9 +4,16 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Pattern;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
-
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+@SuperBuilder
 public class DiagnosesDTOResponse {
 
     @NotBlank
@@ -30,63 +37,4 @@ public class DiagnosesDTOResponse {
     @PastOrPresent
     private LocalDateTime date;
 
-    public DiagnosesDTOResponse() {
-    }
-
-    public DiagnosesDTOResponse(String diagnose, String treatment, Long doctorId, Long petId, Long appointmentId, LocalDateTime date) {
-        this.diagnose = diagnose;
-        this.treatment = treatment;
-        this.doctorId = doctorId;
-        this.petId = petId;
-        this.appointmentId = appointmentId;
-        this.date = date;
-    }
-
-    public String getDiagnose() {
-        return diagnose;
-    }
-
-    public void setDiagnose(String diagnose) {
-        this.diagnose = diagnose;
-    }
-
-    public String getTreatment() {
-        return treatment;
-    }
-
-    public void setTreatment(String treatment) {
-        this.treatment = treatment;
-    }
-
-    public Long getDoctorId() {
-        return doctorId;
-    }
-
-    public void setDoctorId(Long doctorId) {
-        this.doctorId = doctorId;
-    }
-
-    public Long getAppointmentId() {
-        return appointmentId;
-    }
-
-    public void setAppointmentId(Long appointmentId) {
-        this.appointmentId = appointmentId;
-    }
-
-    public Long getPetId() {
-        return petId;
-    }
-
-    public void setPetId(Long petId) {
-        this.petId = petId;
-    }
-
-    public LocalDateTime getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDateTime date) {
-        this.date = date;
-    }
 }
