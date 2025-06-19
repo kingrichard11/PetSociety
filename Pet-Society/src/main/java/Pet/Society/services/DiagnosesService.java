@@ -9,6 +9,7 @@ import Pet.Society.models.entities.PetEntity;
 import Pet.Society.models.enums.Status;
 import Pet.Society.models.exceptions.AppointmentNotFoundException;
 import Pet.Society.models.exceptions.DiagnosesNotFoundException;
+import Pet.Society.models.interfaces.Mapper;
 import Pet.Society.repositories.AppointmentRepository;
 import Pet.Society.repositories.DiagnosesRepository;
 import Pet.Society.repositories.DoctorRepository;
@@ -23,7 +24,7 @@ import java.util.List;
 import java.util.Random;
 
 @Service
-public class DiagnosesService {
+public class DiagnosesService implements Mapper<DiagnosesDTOResponse, DiagnosesEntity> {
 
     private final DiagnosesRepository diagnosesRepository;
     private final PetRepository petRepository;
@@ -68,21 +69,16 @@ public class DiagnosesService {
         return dto;
     }
 
-    public DiagnosesEntity findById(Long id) {
-        return diagnosesRepository.findById(id)
-                .orElseThrow(() -> new DiagnosesNotFoundException("Diagnosis " + id + " not found"));
+    public DiagnosesDTOResponse findById(Long id) {
+        return toDTO(diagnosesRepository.findById(id)
+                .orElseThrow(() -> new DiagnosesNotFoundException("Diagnosis " + id + " not found")));
     }
 
 
     public DiagnosesDTOResponse findLastById(long id) {
         if (diagnosesRepository.findLastById(id).isPresent()) {
             DiagnosesEntity diagnosis = diagnosesRepository.findLastById(id).get();
-            return new DiagnosesDTOResponse(diagnosis.getDiagnose(),
-                    diagnosis.getTreatment(),
-                    diagnosis.getDoctor().getId(),
-                    diagnosis.getPet().getId(),
-                    diagnosis.getAppointment().getId(),
-                    diagnosis.getDate());
+            return toDTO(diagnosis);
         } else {
             throw new DiagnosesNotFoundException("Diagnosis " + id + " not found");
         }
@@ -92,22 +88,12 @@ public class DiagnosesService {
         if (diagnosesRepository.findByPetId(id, pageable).isEmpty()) {
             throw new DiagnosesNotFoundException("Diagnoses of Pet id : " + id + " not found");
         }
-        return diagnosesRepository.findByPetId(id, pageable).map(diagnosesEntity -> new DiagnosesDTOResponse(diagnosesEntity.getDiagnose(),
-                diagnosesEntity.getTreatment(),
-                diagnosesEntity.getDoctor().getId(),
-                diagnosesEntity.getPet().getId(),
-                diagnosesEntity.getAppointment().getId(),
-                diagnosesEntity.getDate()));
+        return diagnosesRepository.findByPetId(id, pageable).map(this::toDTO);
 
     }
 
     public Page<DiagnosesDTOResponse> findAll(Pageable pageable) {
-        return diagnosesRepository.findAll(pageable).map(diagnoses -> new DiagnosesDTOResponse(diagnoses.getDiagnose(),
-                diagnoses.getTreatment(),
-                diagnoses.getDoctor().getId(),
-                diagnoses.getPet().getId(),
-                diagnoses.getAppointment().getId(),
-                diagnoses.getDate()));
+        return diagnosesRepository.findAll(pageable).map(this::toDTO);
     }
 
     public Page<DiagnosesDTOResponse> findByDoctorId(long id, Pageable pageable) {
@@ -115,13 +101,23 @@ public class DiagnosesService {
         if (diagnosesRepository.findByDoctorId(id, pageable).isEmpty()) {
             throw new DiagnosesNotFoundException("Diagnoses of Doctor id : " + id + " not found");
         }
-        return diagnosesRepository.findByDoctorId(id, pageable).map(diagnoses -> new DiagnosesDTOResponse(
-                diagnoses.getDiagnose(),
-                diagnoses.getTreatment(),
-                diagnoses.getDoctor().getId(),
-                diagnoses.getPet().getId(),
-                diagnoses.getAppointment().getId(),
-                diagnoses.getDate()
-        ));
+        return diagnosesRepository.findByDoctorId(id, pageable).map(this::toDTO);
+    }
+
+    @Override
+    public DiagnosesEntity toEntity(DiagnosesDTOResponse dto) {
+        return null;
+    }
+
+    @Override
+    public DiagnosesDTOResponse toDTO(DiagnosesEntity entity) {
+        return DiagnosesDTOResponse.builder()
+                .diagnose(entity.getDiagnose())
+                .treatment(entity.getTreatment())
+                .doctorName(entity.getDoctor().getName())
+                .petName(entity.getPet().getName())
+                .appointmentReason(entity.getAppointment().getReason())
+                .date(entity.getDate())
+                .build();
     }
 }

@@ -33,26 +33,6 @@ public class DoctorController {
         this.doctorService = doctorService;
     }
 
-    @Operation(
-            summary = "Create a new doctor",
-            description = "Creates a new doctor based on the provided entity.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "201",
-                            description = "Doctor created successfully",
-                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = DoctorEntity.class))
-                    ),
-                    @ApiResponse(
-                            responseCode = "400",
-                            description = "Invalid input data",
-                            content = @Content(mediaType = "application/json")
-                    )
-            }
-    )
-    @PostMapping("/create")
-    public ResponseEntity<DoctorEntity> createDoctor(@Valid @RequestBody DoctorDTO doctor) {
-        return new ResponseEntity<>(doctorService.save(doctor), HttpStatus.CREATED);
-    }
 
     @Operation(
             summary = "Update an existing doctor",
@@ -72,7 +52,6 @@ public class DoctorController {
     )
     @PatchMapping("/update/{id}")
     public ResponseEntity<DoctorDTO> updateDoctor(@Valid @RequestBody DoctorDTO doctor, @PathVariable Long id) {
-
         return new ResponseEntity<>(doctorService.update(doctor, id), HttpStatus.OK);
     }
 

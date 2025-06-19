@@ -2,6 +2,7 @@ package Pet.Society.models.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -10,7 +11,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-@Builder
+@SuperBuilder
 public class DiagnosesEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

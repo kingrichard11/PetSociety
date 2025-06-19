@@ -1,6 +1,7 @@
 package Pet.Society.controllers;
 
 import Pet.Society.models.dto.appointment.AppointmentDTO;
+import Pet.Society.models.dto.appointment.AppointmentResponseDTO;
 import Pet.Society.models.dto.appointment.AppointmentUpdateDTO;
 import Pet.Society.models.dto.pet.AssingmentPetDTO;
 import Pet.Society.models.entities.AppointmentEntity;
@@ -56,10 +57,8 @@ public class AppointmentController {
             }
     )
     @PostMapping("/create")
-    public ResponseEntity<AppointmentEntity> createAppointment(@RequestBody AppointmentDTO appointment) {
-        AppointmentEntity appointmentEntity = this.appointmentService.save(appointment);
-
-        return ResponseEntity.ok(appointmentEntity);
+    public ResponseEntity<AppointmentDTO> createAppointment(@RequestBody AppointmentDTO appointment) {
+        return ResponseEntity.ok(this.appointmentService.save(appointment));
     }
 
     @Operation(
@@ -77,7 +76,7 @@ public class AppointmentController {
             }
     )
     @PatchMapping("/assign/{id}")
-    public ResponseEntity<AppointmentEntity> assignAppointment(@PathVariable("id") Long appointmentId, @RequestBody AssingmentPetDTO pet) {
+    public ResponseEntity<AppointmentResponseDTO> assignAppointment(@PathVariable("id") Long appointmentId, @RequestBody AssingmentPetDTO pet) {
         return ResponseEntity.ok(this.appointmentService.bookAppointment(appointmentId,pet));
     }
 
@@ -105,9 +104,9 @@ public class AppointmentController {
             }
     )
     @PatchMapping("/update/{id}")
-    public ResponseEntity<AppointmentEntity> updateAppointment(@PathVariable Long id, @RequestBody AppointmentUpdateDTO appointmentUpdateDTO) {
-        AppointmentEntity appointment = this.appointmentService.updateAppointment(appointmentUpdateDTO, id);
-        return ResponseEntity.ok(appointment);
+    public ResponseEntity<AppointmentDTO> updateAppointment(@PathVariable Long id, @RequestBody AppointmentUpdateDTO appointmentUpdateDTO) {
+
+        return ResponseEntity.ok(this.appointmentService.updateAppointment(appointmentUpdateDTO, id));
     }
 
     @Operation(
@@ -133,8 +132,8 @@ public class AppointmentController {
             }
     )
     @GetMapping("/client/{clientId}")
-    public ResponseEntity<List<AppointmentEntity>> getAppointmentsByClientId(@PathVariable Long clientId) {
-            return ResponseEntity.ok(this.appointmentService.getAllAppointmentsByClientId(clientId));
+    public ResponseEntity<List<AppointmentResponseDTO>> getAppointmentsByClientId(@PathVariable Long clientId) {
+            return ResponseEntity.ok(this.appointmentService.getLastAppointmentsByClientId(clientId));
     }
 
     @Operation(
@@ -160,7 +159,7 @@ public class AppointmentController {
             }
     )
     @GetMapping("/pet/{petId}")
-    public ResponseEntity<List<AppointmentEntity>> getAppointmentsByPetId(@PathVariable Long petId) {
+    public ResponseEntity<List<AppointmentResponseDTO>> getAppointmentsByPetId(@PathVariable Long petId) {
         return ResponseEntity.ok(this.appointmentService.getAllAppointmentsByPetId(petId));
     }
 
@@ -187,8 +186,8 @@ public class AppointmentController {
             }
     )
     @GetMapping("/doctor/{doctorId}")
-    public ResponseEntity<List<AppointmentEntity>> getAppointmentsByDoctorId(@PathVariable Long doctorId) {
-        return ResponseEntity.ok(this.appointmentService.getAllAppointmentsByDoctorId(doctorId));
+    public ResponseEntity<List<AppointmentResponseDTO>> availableAppointmentsDoctor(@PathVariable Long doctorId) {
+        return ResponseEntity.ok(this.appointmentService.getAvailableAppointmentsDoctorForToday(doctorId));
     }
 
 

@@ -7,6 +7,7 @@ import Pet.Society.models.exceptions.UserExistsException;
 import Pet.Society.models.exceptions.UserNotFoundException;
 import Pet.Society.models.interfaces.Mapper;
 import Pet.Society.repositories.DoctorRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +28,7 @@ public class DoctorService implements Mapper<DoctorDTO, DoctorEntity> {
         this.doctorRepository = doctorRepository;
     }
 
+    @Transactional
     public DoctorEntity saveEntity(DoctorEntity doctorEntity) {
         if(doctorExistByDni(doctorEntity.getDni())){
             throw new UserExistsException("The doctor already exists");

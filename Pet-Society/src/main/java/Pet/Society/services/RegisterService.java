@@ -10,6 +10,7 @@ import Pet.Society.models.enums.Role;
 import Pet.Society.models.exceptions.UserAttributeException;
 import Pet.Society.models.interfaces.Mapper;
 import com.mysql.cj.xdevapi.Client;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -75,6 +76,7 @@ public class RegisterService  {
         credentialService.save(credentialEntity);
     }
 
+    @Transactional(rollbackOn = UserAttributeException.class)
     public void registerNewDoctor(RegisterDTO registerDTO) {
         if (doctorService.doctorExistByDni(registerDTO.getDni())) {
             throw new UserAttributeException("Doctor with this DNI already exists");
@@ -87,10 +89,12 @@ public class RegisterService  {
         doctorEntity.setEmail(registerDTO.getEmail());
         doctorEntity.setPhone(registerDTO.getPhone());
         doctorEntity.setSpeciality(registerDTO.getSpeciality());
+
         CredentialEntity credentialEntity = new CredentialEntity();
         credentialEntity.setUsername(registerDTO.getUsername());
         credentialEntity.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
         credentialEntity.setRole(Role.DOCTOR);
+
         doctorService.saveEntity(doctorEntity);
 
         credentialEntity.setUser(doctorEntity);

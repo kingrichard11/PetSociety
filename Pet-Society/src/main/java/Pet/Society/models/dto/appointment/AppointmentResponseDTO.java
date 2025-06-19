@@ -13,10 +13,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Data
 @SuperBuilder
-public class AppointmentDTO {
+public class AppointmentResponseDTO {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private long doctor;
+    private String doctorName;
+    private String petName;
     private Reason reason;
     private boolean aproved;
 }

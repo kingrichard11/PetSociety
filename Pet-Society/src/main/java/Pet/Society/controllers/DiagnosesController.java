@@ -82,8 +82,8 @@ public class DiagnosesController {
             }
     )
     @GetMapping("/findById/{id}")
-    public ResponseEntity<DiagnosesEntity> getDiagnosisById(@PathVariable Long id) {
-        DiagnosesEntity diagnosis = diagnosesService.findById(id);
+    public ResponseEntity<DiagnosesDTOResponse> getDiagnosisById(@PathVariable Long id) {
+        DiagnosesDTOResponse diagnosis = diagnosesService.findById(id);
         return ResponseEntity.ok(diagnosis);
     }
 

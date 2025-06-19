@@ -1,5 +1,8 @@
 package Pet.Society.models.dto.diagnoses;
 
+import Pet.Society.models.entities.DiagnosesEntity;
+import Pet.Society.models.enums.Reason;
+import Pet.Society.models.interfaces.Mapper;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
@@ -16,6 +19,7 @@ import java.time.LocalDateTime;
 @SuperBuilder
 public class DiagnosesDTOResponse {
 
+
     @NotBlank
     @Pattern(regexp = "^[A-Za-z0-9 ]+$")
     private String diagnose;
@@ -25,16 +29,20 @@ public class DiagnosesDTOResponse {
     private String treatment;
 
     @NotNull
-    private Long doctorId;
+    private String doctorName;
 
     @NotNull
-    private Long petId;
+    private String petName;
 
     @NotNull
-    private Long appointmentId;
+    private Reason appointmentReason;
 
     @NotNull
     @PastOrPresent
     private LocalDateTime date;
+
+
+
+
 
 }

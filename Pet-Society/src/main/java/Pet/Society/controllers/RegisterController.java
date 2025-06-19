@@ -2,6 +2,7 @@ package Pet.Society.controllers;
 
 import Pet.Society.models.dto.client.ClientDTO;
 import Pet.Society.models.dto.register.RegisterDTO;
+import Pet.Society.models.dto.register.RegisterDoctorDTO;
 import Pet.Society.services.RegisterService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,7 +105,7 @@ public class RegisterController {
             }
     )
     @PostMapping("/new/doctor")
-    public ResponseEntity<String> registerDoctor(@Valid @RequestBody RegisterDTO dto) {
+    public ResponseEntity<String> registerDoctor(@Valid @RequestBody RegisterDoctorDTO dto) {
         registerService.registerNewDoctor(dto);
         return ResponseEntity.ok("Successfully registered doctor");
     }

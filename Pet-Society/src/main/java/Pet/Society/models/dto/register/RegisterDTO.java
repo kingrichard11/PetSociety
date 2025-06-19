@@ -31,14 +31,10 @@ public class RegisterDTO {
     @Size(min = 9, max = 20, message = "Error at phone")
     private String phone;
     @NotNull
-    @Size(min = 7, max = 8, message = "Error in t")
+    @Size(min = 7, max = 8, message = "Error in dni")
     private String dni;
     @Email
     @NotNull
     private String email;
-
-    @Enumerated(EnumType.STRING)
-    private Speciality speciality;
-
 
 }
