@@ -2,6 +2,7 @@ package Pet.Society.models.dto.appointment;
 
 import Pet.Society.models.entities.DoctorEntity;
 import Pet.Society.models.enums.Reason;
+import Pet.Society.models.enums.Status;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,4 +21,5 @@ public class AppointmentResponseDTO {
     private String petName;
     private Reason reason;
     private boolean aproved;
+    private Status status;
 }

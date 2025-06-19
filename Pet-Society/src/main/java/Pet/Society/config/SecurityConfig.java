@@ -49,6 +49,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
 
                 .authorizeHttpRequests(auth -> auth
+                        /**
                         //REGISTRARSE Y LOGUEARSE
                         .requestMatchers(HttpMethod.POST,"/register/new/client").permitAll()
                         .requestMatchers(HttpMethod.POST,"/auth/login").permitAll()
@@ -72,6 +73,7 @@ public class SecurityConfig {
                         .requestMatchers("/diagnoses/assignRandom").hasRole("ADMIN")
                         .requestMatchers("/diagnoses/create").hasRole("DOCTOR")
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() //For use correctly the OPENAPI
+                        **/
                         .anyRequest().permitAll()
 
                 )

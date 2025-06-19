@@ -18,15 +18,19 @@ import Pet.Society.models.exceptions.UnavailableAppointmentException;
 import Pet.Society.models.interfaces.Mapper;
 import Pet.Society.repositories.AppointmentRepository;
 import jakarta.transaction.Transactional;
+import org.aspectj.weaver.patterns.ThisOrTargetAnnotationPointcut;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 
 @Service
 public class AppointmentService implements Mapper<AppointmentDTO,AppointmentEntity> {
@@ -35,14 +39,16 @@ public class AppointmentService implements Mapper<AppointmentDTO,AppointmentEnti
     private final DoctorService doctorService;
     private final PetService petService;
     private final ClientService clientService;
+    private final HttpMessageConverters messageConverters;
 
 
     @Autowired
-    public AppointmentService(AppointmentRepository appointmentRepository, DoctorService doctorService, PetService petService, ClientService clientService) {
+    public AppointmentService(AppointmentRepository appointmentRepository, DoctorService doctorService, PetService petService, ClientService clientService, HttpMessageConverters messageConverters) {
         this.appointmentRepository = appointmentRepository;
         this.doctorService = doctorService;
         this.petService = petService;
         this.clientService = clientService;
+        this.messageConverters = messageConverters;
     }
 
 
@@ -82,18 +88,21 @@ public class AppointmentService implements Mapper<AppointmentDTO,AppointmentEnti
             throw new UnavailableAppointmentException("The client has an unpaid appointment");
         }
 
-        PetEntity findPet = this.petService.findById(dto.getPetId());
+        Optional<PetEntity> findPet =Optional.ofNullable(this.petService.findById(dto.getPetId())) ;
 
-        findAppointment.setPet(findPet);
+        findAppointment.setPet(findPet.get());
+        findAppointment.setStatus(Status.TO_BEGIN);
         this.appointmentRepository.save(findAppointment);
+
 
         return AppointmentResponseDTO.builder()
                 .startTime(findAppointment.getStartDate())
-                .startTime(findAppointment.getEndDate())
+                .endTime(findAppointment.getEndDate())
                 .reason(findAppointment.getReason())
-                .doctorName(findAppointment.getDoctor().getName())
-                .petName(findPet.getName())
+                .doctorName(findAppointment.getDoctor().getName() +" " + findAppointment.getDoctor().getSurname())
+                .petName(findPet.get().getName())
                 .aproved(findAppointment.isApproved())
+                .status(findAppointment.getStatus())
                 .build();
     }
 
@@ -110,14 +119,14 @@ public class AppointmentService implements Mapper<AppointmentDTO,AppointmentEnti
     }
 
     ///WORKS
-    public AppointmentDTO updateAppointment(AppointmentUpdateDTO appointmentUpdateDTO, long id) {
+    public AppointmentDTO updateAppointment(AppointmentDTO appointmentUpdateDTO, long id) {
         Optional<AppointmentEntity> existingAppointment = this.appointmentRepository.findById(id);
         if (existingAppointment.isEmpty()) {
             throw new AppointmentDoesntExistException("Appointment does not exist");
         }
-        AppointmentEntity appointmentToUpdate = existingAppointment.get();
-        if (appointmentUpdateDTO.getApproved() != null) {
-            appointmentToUpdate.setApproved(appointmentUpdateDTO.getApproved());
+        AppointmentEntity appointmentToUpdate =  existingAppointment.get();
+        if (appointmentUpdateDTO.getAproved() != null) {
+            appointmentToUpdate.setApproved(appointmentUpdateDTO.getAproved());
         }
 
         if (appointmentUpdateDTO.getReason() != null) {
@@ -128,28 +137,47 @@ public class AppointmentService implements Mapper<AppointmentDTO,AppointmentEnti
             appointmentToUpdate.setStatus(appointmentUpdateDTO.getStatus());
         }
 
-        if (appointmentUpdateDTO.getPetId() != null) {
-            PetEntity pet = this.petService.findById(appointmentUpdateDTO.getPetId());
-            appointmentToUpdate.setPet(pet);
-        }
+        appointmentToUpdate.setPet(appointmentToUpdate.getPet());
 
-        if (appointmentUpdateDTO.getDiagnosesId() != null) {
-            // Aquí deberías buscar el Diagnóstico por ID y asignarlo a la cita
-            // DiagnosesEntity diagnoses = this.diagnosesService.getDiagnosesById(appointmentUpdateDTO.getDiagnosesId());
-            // appointmentToUpdate.setDiagnoses(diagnoses);
-        }
-        this.appointmentRepository.save(appointmentToUpdate);
+            this.appointmentRepository.save(appointmentToUpdate);
         return toDTO(appointmentToUpdate);
     }
 
+
+
     public void cancelAppointment(long id) {
+        Optional<AppointmentEntity> existingAppointment = this.appointmentRepository.findById(id);
+
+        if (existingAppointment.isEmpty()) {
+            throw new AppointmentDoesntExistException("Appointment does not exist");
+        }
+
+        if(Duration.between(LocalDateTime.now(), existingAppointment.get().getEndDate()).toMinutes() > 12) {
+            existingAppointment.get().setStatus(Status.AVAILABLE);
+            existingAppointment.get().setPet(null);
+            updateAppointment(toDTO(existingAppointment.get()), existingAppointment.get().getId());
+        }else{
+            existingAppointment.get().setStatus(Status.CANCELED);
+            updateAppointment(toDTO(existingAppointment.get()), existingAppointment.get().getId());
+        }
+    }
+
+    public AppointmentResponseDTO getAppointment(long id) {
         Optional<AppointmentEntity> existingAppointment = this.appointmentRepository.findById(id);
         if (existingAppointment.isEmpty()) {
             throw new AppointmentDoesntExistException("Appointment does not exist");
         }
-        AppointmentUpdateDTO appointmentUpdateDTO = new AppointmentUpdateDTO();
-        appointmentUpdateDTO.setStatus(Status.CANCELED);
-        updateAppointment(appointmentUpdateDTO, id);
+        //This variable is for put in the pet name. For some reason, the method fails if there are not a Pet in the Appointment
+        String message = existingAppointment.get().getPet() == null ? "No hay mascota asignada" : existingAppointment.get().getPet().getName();
+        return AppointmentResponseDTO.builder()
+                .startTime(existingAppointment.get().getStartDate())
+                .endTime(existingAppointment.get().getEndDate())
+                .reason(existingAppointment.get().getReason())
+                .doctorName(existingAppointment.get().getDoctor().getName()+ " " +existingAppointment.get().getDoctor().getSurname())
+                .aproved(existingAppointment.get().isApproved())
+                .status(existingAppointment.get().getStatus())
+                .petName(message)
+                .build();
     }
 
     public List<AppointmentResponseDTO> getLastAppointmentsByClientId(long id) {
@@ -165,7 +193,7 @@ public class AppointmentService implements Mapper<AppointmentDTO,AppointmentEnti
                         .reason(appointmentEntity.getReason())
                         .aproved(appointmentEntity.isApproved())
                         .petName(appointmentEntity.getPet().getName())
-                        .doctorName(appointmentEntity.getDoctor().getName())
+                        .doctorName(appointmentEntity.getDoctor().getName() +" " + appointmentEntity.getDoctor().getSurname())
                         .build()).collect(Collectors.toList());
     }
 
@@ -182,7 +210,7 @@ public class AppointmentService implements Mapper<AppointmentDTO,AppointmentEnti
                         .reason(appointmentEntity.getReason())
                         .aproved(appointmentEntity.isApproved())
                         .petName(appointmentEntity.getPet().getName())
-                        .doctorName(appointmentEntity.getDoctor().getName())
+                        .doctorName(appointmentEntity.getDoctor().getName() + " " + appointmentEntity.getDoctor().getSurname())
                         .build()).collect(Collectors.toList());
     }
 
@@ -197,7 +225,7 @@ public class AppointmentService implements Mapper<AppointmentDTO,AppointmentEnti
                         .reason(appointmentEntity.getReason())
                         .aproved(appointmentEntity.isApproved())
                         .petName(appointmentEntity.getPet().getName())
-                        .doctorName(appointmentEntity.getDoctor().getName())
+                        .doctorName(appointmentEntity.getDoctor().getName()+  " " + appointmentEntity.getDoctor().getSurname())
                         .build()).collect(Collectors.toList());
     }
 
@@ -216,8 +244,9 @@ public class AppointmentService implements Mapper<AppointmentDTO,AppointmentEnti
                 .startDate(dto.getStartTime())
                 .endDate(dto.getEndTime())
                 .reason(dto.getReason())
+                .status(dto.getStatus())
                 .doctor(this.doctorService.findById1(dto.getDoctor()))
-                .approved(dto.isAproved())
+                .approved(dto.getAproved())
                 .build();
     }
 
@@ -227,6 +256,7 @@ public class AppointmentService implements Mapper<AppointmentDTO,AppointmentEnti
                 .startTime(entity.getStartDate())
                 .endTime(entity.getEndDate())
                 .reason(entity.getReason())
+                .status(entity.getStatus())
                 .doctor(entity.getDoctor().getId())
                 .aproved(entity.isApproved())
                 .build();

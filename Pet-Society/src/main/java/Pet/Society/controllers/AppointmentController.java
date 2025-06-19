@@ -104,9 +104,20 @@ public class AppointmentController {
             }
     )
     @PatchMapping("/update/{id}")
-    public ResponseEntity<AppointmentDTO> updateAppointment(@PathVariable Long id, @RequestBody AppointmentUpdateDTO appointmentUpdateDTO) {
+    public ResponseEntity<AppointmentDTO> updateAppointment(@PathVariable Long id, @RequestBody AppointmentDTO appointmentUpdateDTO) {
 
         return ResponseEntity.ok(this.appointmentService.updateAppointment(appointmentUpdateDTO, id));
+    }
+
+    @DeleteMapping("/cancel/{id}")
+    public ResponseEntity<String> cancelAppointment(@PathVariable Long id) {
+        this.appointmentService.cancelAppointment(id);
+        return ResponseEntity.ok("Appointment cancelled successfully");
+    }
+
+    @GetMapping("/findAppointment/{id}")
+    public ResponseEntity<AppointmentResponseDTO> getAllAppointments(@PathVariable Long id) {
+        return ResponseEntity.ok(this.appointmentService.getAppointment(id));
     }
 
     @Operation(

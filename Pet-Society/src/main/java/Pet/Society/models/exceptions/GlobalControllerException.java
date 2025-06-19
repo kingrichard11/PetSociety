@@ -29,7 +29,7 @@ public class GlobalControllerException {
     }
 
     @ExceptionHandler(NoPetsException.class)
-    public ProblemDetail HandlerNoPetsException(UserExistsException ex, HttpServletRequest request) {
+    public ProblemDetail HandlerNoPetsException(NoPetsException ex, HttpServletRequest request) {
         return createProblemDetail(HttpStatus.CONFLICT, "No Pets Exception", "The client doesn't have pets", request);
     }
 
@@ -80,4 +80,19 @@ public class GlobalControllerException {
     public ProblemDetail HandlerException(Exception ex, HttpServletRequest request) {
         return createProblemDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", "There was an error processing the request. " + ex.getMessage(), request);
     }
+
+    @ExceptionHandler(BeforeAppointmentException.class)
+    public ProblemDetail handlerBeforeAppointmentException(BeforeAppointmentException ex, HttpServletRequest request) {
+        return createProblemDetail(HttpStatus.CONFLICT, "Before Appointment Exception", "You can't make a diagnoses before appointment starts" + ex.getMessage(), request);
+    }
+
+
+    @ExceptionHandler(AppointmentWithoutPetException.class)
+    public ProblemDetail HandlerAppointmentWithoutPetException(AppointmentWithoutPetException ex, HttpServletRequest request) {
+        return createProblemDetail(HttpStatus.CONFLICT, "Appointment Without Pet", "You can't make a diagnoses without a pet in the appointment", request);
+    }
+
+
+
+
 }

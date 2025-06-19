@@ -7,8 +7,7 @@ import Pet.Society.models.entities.DiagnosesEntity;
 import Pet.Society.models.entities.DoctorEntity;
 import Pet.Society.models.entities.PetEntity;
 import Pet.Society.models.enums.Status;
-import Pet.Society.models.exceptions.AppointmentNotFoundException;
-import Pet.Society.models.exceptions.DiagnosesNotFoundException;
+import Pet.Society.models.exceptions.*;
 import Pet.Society.models.interfaces.Mapper;
 import Pet.Society.repositories.AppointmentRepository;
 import Pet.Society.repositories.DiagnosesRepository;
@@ -19,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
@@ -50,6 +50,10 @@ public class DiagnosesService implements Mapper<DiagnosesDTOResponse, DiagnosesE
         AppointmentEntity appointment = appointmentRepository.findById(dto.getAppointmentId())
                 .orElseThrow(() -> new AppointmentNotFoundException("Appointment not found"));
 
+        if(appointment.getPet()==null){
+            throw new AppointmentWithoutPetException("There is not pets in this appointment");
+        }
+
         if (dto.getDate().isAfter(java.time.LocalDateTime.now())) {
             throw new IllegalArgumentException("the date entered is incorrect");
         }
@@ -62,6 +66,10 @@ public class DiagnosesService implements Mapper<DiagnosesDTOResponse, DiagnosesE
                 .appointment(appointment)
                 .date(dto.getDate())
                 .build();
+
+        if(dto.getDate().isAfter(appointment.getStartDate())) {
+            throw new BeforeAppointmentException("The date of the diagnoses is after the Appointment start date");
+        }
 
         appointment.setStatus(Status.SUCCESSFULLY);
         appointment.setDiagnoses(diagnosis);
