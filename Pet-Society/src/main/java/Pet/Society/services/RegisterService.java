@@ -2,6 +2,7 @@ package Pet.Society.services;
 
 import Pet.Society.models.dto.client.ClientDTO;
 import Pet.Society.models.dto.register.RegisterDTO;
+import Pet.Society.models.dto.register.RegisterDoctorDTO;
 import Pet.Society.models.entities.ClientEntity;
 import Pet.Society.models.entities.CredentialEntity;
 import Pet.Society.models.entities.DoctorEntity;
@@ -77,7 +78,7 @@ public class RegisterService  {
     }
 
     @Transactional(rollbackOn = UserAttributeException.class)
-    public void registerNewDoctor(RegisterDTO registerDTO) {
+    public void registerNewDoctor(RegisterDoctorDTO registerDTO) {
         if (doctorService.doctorExistByDni(registerDTO.getDni())) {
             throw new UserAttributeException("Doctor with this DNI already exists");
         }

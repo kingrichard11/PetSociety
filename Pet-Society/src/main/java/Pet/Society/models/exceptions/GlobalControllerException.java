@@ -75,18 +75,6 @@ public class GlobalControllerException {
         return createProblemDetail(HttpStatus.CONFLICT, "Unavailable Appointment", ex.getMessage(), request);
     }
 
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ProblemDetail handleUniqueConstraintViolation(DataIntegrityViolationException ex, HttpServletRequest request) {
-        String message = "That data already exists";
-        if (ex.getMessage() != null && ex.getMessage().toLowerCase().contains("duplicate")) {
-            if (ex.getMessage().toLowerCase().contains("email")) {
-                message = "The email already exists";
-            } else if (ex.getMessage().toLowerCase().contains("dni")) {
-                message = "The DNI already exists";
-            }
-        }
-        return createProblemDetail(HttpStatus.BAD_REQUEST, "Data Integrity Violation", message, request);
-    }
 
     @ExceptionHandler(Exception.class)
     public ProblemDetail HandlerException(Exception ex, HttpServletRequest request) {

@@ -47,7 +47,7 @@ public class DoctorService implements Mapper<DoctorDTO, DoctorEntity> {
     public DoctorEntity findById1(Long id){
         Optional<DoctorEntity> doctor = this.doctorRepository.findById(id);
         if (doctor.isEmpty()){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor not found");
+            throw new UserNotFoundException("Doctor not found");
         }
         return doctor.get();
     }

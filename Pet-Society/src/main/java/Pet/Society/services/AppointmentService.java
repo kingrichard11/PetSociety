@@ -66,9 +66,10 @@ public class AppointmentService implements Mapper<AppointmentDTO,AppointmentEnti
         if (isOverlapping(appointment)) {
             throw new DuplicatedAppointmentException("The appointment already exists; it has the same hour.");
         }
-
-        return toDTO(this.appointmentRepository.save(appointment));
+        this.appointmentRepository.save(appointment);
+        return toDTO(appointment);
     }
+
     @Transactional
     public AppointmentResponseDTO bookAppointment(Long idAppointment, AssingmentPetDTO dto) {
         AppointmentEntity findAppointment = this.appointmentRepository.
