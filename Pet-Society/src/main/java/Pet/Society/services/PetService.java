@@ -11,6 +11,7 @@ import Pet.Society.models.interfaces.Mapper;
 import Pet.Society.repositories.ClientRepository;
 import Pet.Society.repositories.PetRepository;
 import com.github.javafaker.Faker;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,6 +37,7 @@ public class PetService implements Mapper<PetDTO, PetEntity> {
     }
 
 
+    @Transactional
     public PetDTO createPet(PetDTO dto) {
         ClientEntity client = clientRepository.findById(dto.getClientId())
                 .orElseThrow(() -> new UserNotFoundException("Cliente with ID " + dto.getClientId() + " not found."));

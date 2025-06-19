@@ -162,6 +162,10 @@ public class AppointmentService implements Mapper<AppointmentDTO,AppointmentEnti
         }
     }
 
+    public AppointmentEntity getEntity(Long id) {
+        return this.appointmentRepository.findById(id).orElseThrow(() -> new AppointmentDoesntExistException("Appointment does not exist"));
+    }
+
     public AppointmentResponseDTO getAppointment(long id) {
         Optional<AppointmentEntity> existingAppointment = this.appointmentRepository.findById(id);
         if (existingAppointment.isEmpty()) {

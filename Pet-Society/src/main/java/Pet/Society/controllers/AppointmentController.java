@@ -1,5 +1,6 @@
 package Pet.Society.controllers;
 
+import Pet.Society.config.OwnershipValidator;
 import Pet.Society.models.dto.appointment.AppointmentDTO;
 import Pet.Society.models.dto.appointment.AppointmentResponseDTO;
 import Pet.Society.models.dto.appointment.AppointmentUpdateDTO;
@@ -13,6 +14,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import Pet.Society.config.OwnershipValidator;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,6 +34,7 @@ public class AppointmentController {
     @Autowired
     public AppointmentController(AppointmentService appointmentService) {
         this.appointmentService = appointmentService;
+
     }
 
 
@@ -56,7 +60,9 @@ public class AppointmentController {
                     )
             }
     )
+
     @PostMapping("/create")
+
     public ResponseEntity<AppointmentDTO> createAppointment(@RequestBody AppointmentDTO appointment) {
         return ResponseEntity.ok(this.appointmentService.save(appointment));
     }
@@ -170,6 +176,7 @@ public class AppointmentController {
             }
     )
     @GetMapping("/pet/{petId}")
+    @PreAuthorize("@ownershipValidator.canAccessPet(#id)")
     public ResponseEntity<List<AppointmentResponseDTO>> getAppointmentsByPetId(@PathVariable Long petId) {
         return ResponseEntity.ok(this.appointmentService.getAllAppointmentsByPetId(petId));
     }

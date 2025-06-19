@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -45,6 +46,7 @@ public class DiagnosesService implements Mapper<DiagnosesDTOResponse, DiagnosesE
         this.appointmentService = appointmentService;
     }
 
+    @Transactional
     public DiagnosesDTO save(DiagnosesDTO dto) {
 
         AppointmentEntity appointment = appointmentRepository.findById(dto.getAppointmentId())
@@ -54,9 +56,10 @@ public class DiagnosesService implements Mapper<DiagnosesDTOResponse, DiagnosesE
             throw new AppointmentWithoutPetException("There is not pets in this appointment");
         }
 
-        if (dto.getDate().isAfter(java.time.LocalDateTime.now())) {
-            throw new IllegalArgumentException("the date entered is incorrect");
+        if (LocalDateTime.now().isBefore(appointment.getStartDate())) {
+            throw new BeforeAppointmentException(" The appointment is after the current date");
         }
+
 
         DiagnosesEntity diagnosis = DiagnosesEntity.builder()
                 .diagnose(dto.getDiagnose())

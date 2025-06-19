@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ public class PetController {
         this.petService = petService;
     }
 
+
     @Operation(
             summary = "Create a new pet",
             description = "Endpoint to register a new pet to a client.",
@@ -55,6 +57,7 @@ public class PetController {
             }
     )
     @PostMapping("/create")
+    @PreAuthorize("@ownershipValidator.canAccessPet(#dto.clientId)")
     public ResponseEntity<PetDTO> createPet(@Valid @RequestBody PetDTO dto) {
         return ResponseEntity.ok(petService.createPet(dto));
     }
@@ -81,6 +84,7 @@ public class PetController {
             }
     )
     @PatchMapping("/update/{id}")
+    @PreAuthorize("@ownershipValidator.canAccessPet(#id)")
     public ResponseEntity<PetDTO> updatePet(@PathVariable Long id, @RequestBody PetDTO dto) {
         return ResponseEntity.ok(petService.updatePet(id, dto));
     }
@@ -136,7 +140,7 @@ public class PetController {
             }
     )
     @GetMapping("/findByID/{id}")
-
+    @PreAuthorize("@ownershipValidator.canAccessPet(#id)")
     public ResponseEntity<PetDTO> getPetById(@PathVariable Long id) {
         return ResponseEntity.ok(petService.getPetById(id));
     }
@@ -156,10 +160,11 @@ public class PetController {
             }
     )
     @GetMapping("/findAllByClientId/{id}")
+    @PreAuthorize("@ownershipValidator.canAccessPet(#id)")
     public ResponseEntity<List<PetDTO>> getAllPetsByClientId(@PathVariable("id") Long id) {
         return new ResponseEntity<>(this.petService.getAllPetsByClientId(id), HttpStatus.OK);
     }
-
+    @PreAuthorize("@ownershipValidator.canAccessClient(#dni)")
     @GetMapping("/seeMyPets/{dni}")
     public ResponseEntity<List<PetDTO>> SeeMyPets(@PathVariable("dni") String dni) {
         return ResponseEntity.ok(this.petService.seeMyPets(dni));

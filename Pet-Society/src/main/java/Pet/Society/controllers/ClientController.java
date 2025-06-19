@@ -20,6 +20,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -63,6 +64,7 @@ public class ClientController {
                     )
             }
     )
+    @PreAuthorize("@ownershipValidator.canAccessClient(#id)")
     @PatchMapping("/update/{id}")
     public ResponseEntity<ClientDTO> update(@RequestBody ClientDTO client, @PathVariable long id) {
             this.clientService.update(client,id);
@@ -91,6 +93,7 @@ public class ClientController {
                     )
             }
     )
+    @PreAuthorize("@ownershipValidator.canAccessClient(#id)")
     @DeleteMapping("/unsubscribe/{id}")
     public ResponseEntity<String> unsubscribe(@PathVariable long id) {
         this.clientService.unSubscribe(id);
@@ -119,6 +122,7 @@ public class ClientController {
                     )
             }
     )
+    @PreAuthorize("@ownershipValidator.canAccessClient(#dni)")
     @GetMapping("/findByDni/{dni}")
     public ResponseEntity<ClientDTO> findByDni(@PathVariable String dni){
         return ResponseEntity.ok(this.clientService.findByDNI(dni));
@@ -146,6 +150,7 @@ public class ClientController {
                     )
             }
     )
+    @PreAuthorize("@ownershipValidator.canAccessClient(#id)")
     @GetMapping("/findById/{id}")
     public ResponseEntity<ClientDTO> findById(@PathVariable long id) {
         return ResponseEntity.ok(this.clientService.findById(id));
