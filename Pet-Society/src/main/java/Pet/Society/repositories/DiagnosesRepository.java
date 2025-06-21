@@ -32,4 +32,5 @@ public interface DiagnosesRepository extends JpaRepository<DiagnosesEntity, Long
     @Query("SELECT d FROM DiagnosesEntity d WHERE d.appointment = :appointment")
     Optional<DiagnosesEntity> findByAppointment(@Param("appointment") AppointmentEntity appointment);
 
+    Page<DiagnosesEntity> findByPetClientId(long petClientId, Pageable pageable);
 }

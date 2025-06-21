@@ -58,19 +58,21 @@ public class SecurityConfig {
                         //ACCESS TO CLIENTS
                         .requestMatchers("/client/**").hasAnyRole("ADMIN","CLIENT")
                         //ACCESS TO APPOINTMENTS
+                        .requestMatchers(HttpMethod.POST,"/appointment/uploadAvailability/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST,"/appointment/create").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH,"/appointment/assign/**").hasRole("CLIENT")
                         .requestMatchers(HttpMethod.DELETE,"/appointment/delete/**").hasRole("CLIENT")
                         .requestMatchers(HttpMethod.PATCH,"/appointment/**").hasRole("ADMIN")
                         //ACCESS TO DOCTOR
                         .requestMatchers("/doctor/**").hasRole("ADMIN")
                         // ACCESS TO DIAGNOSES
+                        .requestMatchers("/diagnoses/create").hasRole("DOCTOR")
                         .requestMatchers("/diagnoses/getByPetId/**").hasAnyRole("CLIENT","ADMIN")
                         .requestMatchers("/diagnoses/findById/**",
                                     "/diagnoses/getLastDiagnoses/**",
                                     "/diagnoses/getAll",
-                                    "/diagnoses/getByDoctorId/**").hasAnyRole("ADMIN","DOCTOR")
-                        .requestMatchers("/diagnoses/assignRandom").hasRole("ADMIN")
-                        .requestMatchers("/diagnoses/create").hasRole("DOCTOR")
+                                    "/diagnoses/getByDoctorId/**",
+                                "/diagnoses/lastDiagnoses/**").hasAnyRole("ADMIN","DOCTOR")
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() //For use correctly the OPENAPI
                         .anyRequest().permitAll()
 

@@ -95,6 +95,14 @@ public class DiagnosesService implements Mapper<DiagnosesDTOResponse, DiagnosesE
         }
     }
 
+    public Page<DiagnosesDTOResponse> findByPetClientId(long id, Pageable pageable) {
+        Page<DiagnosesEntity> diagnoses = this.diagnosesRepository.findByPetClientId(id, pageable);
+        if(diagnoses.isEmpty()){
+            return Page.empty();
+        }
+        return diagnoses.map(this::toDTOResponse);
+    }
+
     public Page<DiagnosesDTOResponse> findByPetId(long id, Pageable pageable) {
         if (diagnosesRepository.findByPetId(id, pageable).isEmpty()) {
             throw new DiagnosesNotFoundException("Diagnoses of Pet id : " + id + " not found");

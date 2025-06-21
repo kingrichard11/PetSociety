@@ -38,6 +38,7 @@ public class RegisterService  {
         this.doctorService = doctorService;
     }
 
+    @Transactional
     public ClientDTO registerNewClient(RegisterDTO registerDTO) {
         ClientDTO clientDTO = ClientDTO.builder()
                 .name(registerDTO.getName())
@@ -59,6 +60,7 @@ public class RegisterService  {
         return clientDTO;
     }
 
+    @Transactional
     public void registerNewAdmin(RegisterDTO registerDTO) {
 
         UserEntity userEntity = new UserEntity();

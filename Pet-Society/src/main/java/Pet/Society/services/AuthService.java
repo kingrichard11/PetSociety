@@ -4,6 +4,7 @@ import Pet.Society.models.dto.login.LoginDTO;
 import Pet.Society.models.dto.login.LoginResponseDTO;
 import Pet.Society.models.entities.CredentialEntity;
 import Pet.Society.models.exceptions.UserNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,6 +27,7 @@ public class AuthService {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
     }
+
 
     public LoginResponseDTO login(LoginDTO request){
         authenticationManager.authenticate(

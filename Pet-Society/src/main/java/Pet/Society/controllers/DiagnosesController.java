@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(
@@ -110,7 +111,7 @@ public class DiagnosesController {
             }
     )
     @GetMapping("/getLastDiagnoses/{id}")
-    public ResponseEntity<DiagnosesDTOResponse> getLastDiagnostic(@PathVariable long id) {
+    public ResponseEntity<DiagnosesDTOResponse> getLastDiagnoses(@PathVariable long id) {
         return ResponseEntity.ok(diagnosesService.findLastById(id));
     }
 
@@ -129,6 +130,7 @@ public class DiagnosesController {
             }
     )
     @GetMapping("getByPetId/{id}")
+    @PreAuthorize("@ownershipValidator.canAccessPet(#id)")
     public ResponseEntity<Page<DiagnosesDTOResponse>> getByPetId(@PageableDefault(size = 10, page = 0) Pageable pageable, @PathVariable long id) {
         return ResponseEntity.ok(diagnosesService.findByPetId(id, pageable));
     }
@@ -150,6 +152,11 @@ public class DiagnosesController {
     @GetMapping("/getAll")
     public ResponseEntity<Page<DiagnosesDTOResponse>> getAllDiagnoses(@PageableDefault(size = 10, page = 0) Pageable pageable) {
         return ResponseEntity.ok(diagnosesService.findAll(pageable));
+    }
+    @PreAuthorize("@ownershipValidator.canAccessClient(#id)")
+    @GetMapping("/lastDiagnoses/{id}")
+    public ResponseEntity<Page<DiagnosesDTOResponse>> getClientLastDiagnoses(@PathVariable long id, @PageableDefault(size = 10, page = 0) Pageable pageable){
+        return ResponseEntity.ok(diagnosesService.findByPetClientId(id,pageable));
     }
 
     @Operation(

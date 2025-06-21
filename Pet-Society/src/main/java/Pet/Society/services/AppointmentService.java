@@ -4,6 +4,7 @@ import Pet.Society.models.dto.appointment.AppointmentDTO;
 import Pet.Society.models.dto.appointment.AppointmentResponseDTO;
 import Pet.Society.models.dto.appointment.AppointmentUpdateDTO;
 import Pet.Society.models.dto.client.ClientDTO;
+import Pet.Society.models.dto.doctor.DoctorAvailabilityDTO;
 import Pet.Society.models.dto.pet.AssingmentPetDTO;
 import Pet.Society.models.dto.pet.PetDTO;
 import Pet.Society.models.entities.AppointmentEntity;
@@ -21,6 +22,7 @@ import jakarta.transaction.Transactional;
 import org.aspectj.weaver.patterns.ThisOrTargetAnnotationPointcut;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
+import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -241,6 +243,53 @@ public class AppointmentService implements Mapper<AppointmentDTO,AppointmentEnti
        return false;
     }
 
+    public List<AppointmentResponseDTO> getAvailableAppointments() {
+        return this.appointmentRepository.findAll().stream()
+                .filter(appointment -> appointment.getStatus().equals(Status.AVAILABLE))
+                .map(appointmentEntity -> AppointmentResponseDTO.builder()
+                        .startTime(appointmentEntity.getStartDate())
+                        .endTime(appointmentEntity.getEndDate())
+                        .reason(appointmentEntity.getReason())
+                        .aproved(appointmentEntity.isApproved())
+                        .status(appointmentEntity.getStatus())
+                        .petName("No hay mascota asignada")
+                        .doctorName(appointmentEntity.getDoctor().getName()+  " " + appointmentEntity.getDoctor().getSurname())
+                        .build()).collect(Collectors.toList());
+    }
+    @Transactional
+    public void uploadAvailibility(Long id, DoctorAvailabilityDTO availabilityDTO){
+
+        if (availabilityDTO.getStart() == null || availabilityDTO.getEnd() == null || availabilityDTO.getReason() == null) {
+            throw new IllegalArgumentException("Start, end and reason must be provided");
+        }
+        if (availabilityDTO.getStart().isAfter(availabilityDTO.getEnd())) {
+            throw new IllegalArgumentException("Start must be before end");
+        }
+        DoctorEntity doctorEntity = this.doctorService.findById1(id);
+
+         Duration duration = Duration.between(availabilityDTO.getStart(),availabilityDTO.getEnd());
+         long minutes = duration.toMinutes();
+         long blocksDuration =availabilityDTO.getReason().getDuration();
+
+        if (blocksDuration <= 0) {
+            throw new IllegalArgumentException("Block duration must be positive");
+        }
+
+
+
+         for(long i = 0; i+ blocksDuration <= minutes; i+=blocksDuration){
+             LocalDateTime blockStart = availabilityDTO.getStart().plusMinutes(i);
+             LocalDateTime blockEnd = blockStart.plusMinutes(blocksDuration);
+             this.appointmentRepository.save(AppointmentEntity.builder()
+                             .startDate(blockStart)
+                             .endDate(blockEnd)
+                             .reason(availabilityDTO.getReason())
+                             .doctor(doctorEntity)
+                             .status(Status.AVAILABLE)
+                             .approved(false)
+                             .build());
+         }
+    }
 
     @Override
     public AppointmentEntity toEntity(AppointmentDTO dto) {

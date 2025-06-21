@@ -4,6 +4,7 @@ import Pet.Society.config.OwnershipValidator;
 import Pet.Society.models.dto.appointment.AppointmentDTO;
 import Pet.Society.models.dto.appointment.AppointmentResponseDTO;
 import Pet.Society.models.dto.appointment.AppointmentUpdateDTO;
+import Pet.Society.models.dto.doctor.DoctorAvailabilityDTO;
 import Pet.Society.models.dto.pet.AssingmentPetDTO;
 import Pet.Society.models.entities.AppointmentEntity;
 import Pet.Society.services.AppointmentService;
@@ -82,6 +83,7 @@ public class AppointmentController {
             }
     )
     @PatchMapping("/assign/{id}")
+    @PreAuthorize("@ownershipValidator.canAccessPet(#pet.petId)")
     public ResponseEntity<AppointmentResponseDTO> assignAppointment(@PathVariable("id") Long appointmentId, @RequestBody AssingmentPetDTO pet) {
         return ResponseEntity.ok(this.appointmentService.bookAppointment(appointmentId,pet));
     }
@@ -116,11 +118,13 @@ public class AppointmentController {
     }
 
     @DeleteMapping("/cancel/{id}")
+    @PreAuthorize("@ownershipValidator.canAccessAppointment(#id)")
     public ResponseEntity<String> cancelAppointment(@PathVariable Long id) {
         this.appointmentService.cancelAppointment(id);
         return ResponseEntity.ok("Appointment cancelled successfully");
     }
 
+    @PreAuthorize("@ownershipValidator.canAccessAppointment(#id)")
     @GetMapping("/findAppointment/{id}")
     public ResponseEntity<AppointmentResponseDTO> getAllAppointments(@PathVariable Long id) {
         return ResponseEntity.ok(this.appointmentService.getAppointment(id));
@@ -148,9 +152,16 @@ public class AppointmentController {
                     )
             }
     )
+    @PreAuthorize("@ownershipValidator.canAccessClient(#id)")
     @GetMapping("/client/{clientId}")
     public ResponseEntity<List<AppointmentResponseDTO>> getAppointmentsByClientId(@PathVariable Long clientId) {
             return ResponseEntity.ok(this.appointmentService.getLastAppointmentsByClientId(clientId));
+    }
+
+    @PostMapping("uploadAvailability/{doctorId}")
+    public ResponseEntity<String> uploadAvailabilityDoctor(@PathVariable long doctorId, @RequestBody DoctorAvailabilityDTO availabilityDTO){
+            this.appointmentService.uploadAvailibility(doctorId,availabilityDTO);
+            return ResponseEntity.ok("The hours was uploaded successfully");
     }
 
     @Operation(
@@ -206,6 +217,11 @@ public class AppointmentController {
     @GetMapping("/doctor/{doctorId}")
     public ResponseEntity<List<AppointmentResponseDTO>> availableAppointmentsDoctor(@PathVariable Long doctorId) {
         return ResponseEntity.ok(this.appointmentService.getAvailableAppointmentsDoctorForToday(doctorId));
+    }
+
+    @GetMapping("/available")
+    public ResponseEntity<List<AppointmentResponseDTO>> getAvailableAppointments() {
+        return ResponseEntity.ok(this.appointmentService.getAvailableAppointments());
     }
 
 
